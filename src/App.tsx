@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef } from "react";
-import { RefSimpleSelfie, ReactSimpleSelfie } from "react-simple-selfie";
+import { ReactSimpleSelfie } from "react-simple-selfie";
 import "./styles/app.css";
 import overlay from "./images/overlay.svg";
 import {
@@ -12,6 +12,10 @@ import { Processors } from "simple-selfie";
 import { SimpleSelfie } from "./Namespace";
 import { FacePosition } from "./components/FacePosition";
 import { PictureModal } from "./components/PictureModal";
+
+export interface RefSimpleSelfie {
+  captureImage(): Uint8ClampedArray;
+}
 
 function App() {
   const [lastFaceFrame, setLastFaceFrame] = useState<SimpleSelfie.Frame | null>(
