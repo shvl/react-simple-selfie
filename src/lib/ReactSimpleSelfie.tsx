@@ -6,8 +6,8 @@ import React, {
   useImperativeHandle,
 } from "react";
 import { Selfie } from "simple-selfie";
-import { RefSelfie } from "../interfaces/RefSelfie";
-import { SimpleSelfie } from '../Namespace'
+import { RefSimpleSelfie } from "./RefSimpleSelfie";
+import { SimpleSelfie } from "./Namespace";
 
 export const ReactSimpleSelfie = forwardRef(
   (
@@ -15,21 +15,25 @@ export const ReactSimpleSelfie = forwardRef(
       classes = [],
       styles = {},
       children,
-      onFrameProcessed = () => {},
+      onFaceFrameProcessed = () => {},
+      weightsPath = "",
     }: {
       classes?: string[];
       styles?: React.CSSProperties;
       children?: React.ReactNode;
-      onFrameProcessed?: (frame: SimpleSelfie.ProcessedFrame) => void;
+      onFaceFrameProcessed?: (frame: SimpleSelfie.ProcessedFrame) => void;
+      weightsPath?: string;
     },
-    ref: React.Ref<RefSelfie> 
+    ref: React.Ref<RefSimpleSelfie>
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [selfie, setSelfie] = React.useState<SimpleSelfie.Selfie | null>(null);
+    const [selfie, setSelfie] = React.useState<SimpleSelfie.Selfie | null>(
+      null
+    );
     useImperativeHandle(
       ref,
       () => ({
-        captureImage(): Uint8ClampedArray{
+        captureImage(): Uint8ClampedArray {
           if (!selfie) {
             return new Uint8ClampedArray();
           }
@@ -46,7 +50,8 @@ export const ReactSimpleSelfie = forwardRef(
       }
       const selfieComponent = new Selfie({
         container: containerRef.current,
-        onFrameProcessed: onFrameProcessed,
+        onFaceFrameProcessed: onFaceFrameProcessed,
+        weightsPath: weightsPath,
       });
 
       selfieComponent.start();
@@ -55,7 +60,7 @@ export const ReactSimpleSelfie = forwardRef(
       return () => {
         selfieComponent.stop();
       };
-    }, [containerRef, onFrameProcessed]);
+    }, [containerRef, onFaceFrameProcessed, weightsPath]);
 
     return (
       <div

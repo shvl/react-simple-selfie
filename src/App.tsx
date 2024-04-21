@@ -1,16 +1,17 @@
 import React, { useCallback, useState, useRef } from "react";
 import "./styles/app.css";
-import { ReactSimpleSelfie } from "./components/ReactSimpleSelfie";
+import { ReactSimpleSelfie } from "./lib/ReactSimpleSelfie";
 import overlay from "./images/overlay.svg";
 import {
   FACE_DEVIATION,
   FACE_FRAME,
   FACE_WIDTH,
   SELFIE_FRAME,
+  WIDEO_WEIGHTS_PATH,
 } from "./constants";
 import { Processors } from "simple-selfie";
-import { SimpleSelfie } from "./Namespace";
-import { RefSelfie } from "./interfaces/RefSelfie";
+import { SimpleSelfie } from "./lib/Namespace";
+import { RefSimpleSelfie } from "./lib/RefSimpleSelfie";
 import { FacePosition } from "./components/FacePosition";
 import { PictureModal } from "./components/PictureModal";
 
@@ -28,7 +29,7 @@ function App() {
   const [edgeDetectionImage, setEdgeDetectionImage] = useState("");
   const [blurVariance, setBlurVariance] = useState(0);
 
-  const parentRef = useRef<RefSelfie>();
+  const parentRef = useRef<RefSimpleSelfie>();
 
   const closeModal = useCallback(() => {
     setIsPictureModalOpened(false);
@@ -62,7 +63,7 @@ function App() {
     setBlurVariance(blurVarianceResult);
   }, [parentRef, lastFaceFrame]);
 
-  const onFrameProcessed = useCallback(
+  const onFaceFrameProcessed = useCallback(
     (result: SimpleSelfie.ProcessedFrame) => {
       const { face, faceFrame } = result;
       setLastFaceFrame(faceFrame);
@@ -74,7 +75,7 @@ function App() {
         const deviationFacePosition = face.getFacePosiotion();
         const overlayVisible =
           deviationFaceWidth > FACE_DEVIATION ||
-          deviationFacePosition > FACE_DEVIATION * 2;
+          deviationFacePosition > FACE_DEVIATION;
         setOverlayVisible(overlayVisible);
       }
 
@@ -86,6 +87,12 @@ function App() {
     []
   );
 
+  console.log(
+    process.env.NODE_ENV === "production"
+      ? "./weights"
+      : "./react-simple-selfie/weights"
+  );
+
   return (
     <div className="page-video">
       <FacePosition
@@ -95,10 +102,10 @@ function App() {
         lookDown={lookDown}
       />
 
-      <div className="video-container">
+      <div className="video-container" data-testid="video-container">
         <ReactSimpleSelfie
-          ref={parentRef as React.LegacyRef<RefSelfie> | undefined}
-          onFrameProcessed={onFrameProcessed}
+          ref={parentRef as React.LegacyRef<RefSimpleSelfie> | undefined}
+          onFaceFrameProcessed={onFaceFrameProcessed}
           styles={{
             aspectRatio: "1",
             maxWidth: "560px",
@@ -106,6 +113,8 @@ function App() {
             display: "flex",
             justifyContent: "center",
           }}
+          classes={["video-container__video"]}
+          weightsPath={WIDEO_WEIGHTS_PATH}
         >
           <img
             src={overlay}
