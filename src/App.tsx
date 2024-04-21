@@ -7,7 +7,6 @@ import {
   FACE_FRAME,
   FACE_WIDTH,
   SELFIE_FRAME,
-  WIDEO_WEIGHTS_PATH,
 } from "./constants";
 import { Processors } from "simple-selfie";
 import { SimpleSelfie } from "./lib/Namespace";
@@ -87,12 +86,6 @@ function App() {
     []
   );
 
-  console.log(
-    process.env.NODE_ENV === "production"
-      ? "./weights"
-      : "./react-simple-selfie/weights"
-  );
-
   return (
     <div className="page-video">
       <FacePosition
@@ -114,7 +107,6 @@ function App() {
             justifyContent: "center",
           }}
           classes={["video-container__video"]}
-          weightsPath={WIDEO_WEIGHTS_PATH}
         >
           <img
             src={overlay}

@@ -16,13 +16,11 @@ export const ReactSimpleSelfie = forwardRef(
       styles = {},
       children,
       onFaceFrameProcessed = () => {},
-      weightsPath = "",
     }: {
       classes?: string[];
       styles?: React.CSSProperties;
       children?: React.ReactNode;
       onFaceFrameProcessed?: (frame: SimpleSelfie.ProcessedFrame) => void;
-      weightsPath?: string;
     },
     ref: React.Ref<RefSimpleSelfie>
   ) => {
@@ -51,7 +49,6 @@ export const ReactSimpleSelfie = forwardRef(
       const selfieComponent = new Selfie({
         container: containerRef.current,
         onFaceFrameProcessed: onFaceFrameProcessed,
-        weightsPath: weightsPath,
       });
 
       selfieComponent.start();
@@ -60,7 +57,7 @@ export const ReactSimpleSelfie = forwardRef(
       return () => {
         selfieComponent.stop();
       };
-    }, [containerRef, onFaceFrameProcessed, weightsPath]);
+    }, [containerRef, onFaceFrameProcessed]);
 
     return (
       <div

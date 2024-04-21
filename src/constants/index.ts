@@ -1,9 +1,5 @@
 import { SimpleSelfie } from "../lib/Namespace";
 
-export const WIDEO_WEIGHTS_PATH =
-  process.env.NODE_ENV === "production"
-    ? "./weights"
-    : "./react-simple-selfie/weights";
 export const FACE_WIDTH = 170;
 export const FACE_DEVIATION = 45;
 export const BLUR_THRESHOLD = 1100;
