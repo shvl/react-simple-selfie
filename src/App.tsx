@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useRef } from "react";
+import { RefSimpleSelfie, ReactSimpleSelfie } from "react-simple-selfie";
 import "./styles/app.css";
-import { ReactSimpleSelfie } from "./lib/ReactSimpleSelfie";
 import overlay from "./images/overlay.svg";
 import {
   FACE_DEVIATION,
@@ -9,8 +9,7 @@ import {
   SELFIE_FRAME,
 } from "./constants";
 import { Processors } from "simple-selfie";
-import { SimpleSelfie } from "./lib/Namespace";
-import { RefSimpleSelfie } from "./lib/RefSimpleSelfie";
+import { SimpleSelfie } from "./Namespace";
 import { FacePosition } from "./components/FacePosition";
 import { PictureModal } from "./components/PictureModal";
 

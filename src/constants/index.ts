@@ -1,4 +1,4 @@
-import { SimpleSelfie } from "../lib/Namespace";
+import { SimpleSelfie } from "../Namespace";
 
 export const FACE_WIDTH = 170;
 export const FACE_DEVIATION = 45;
