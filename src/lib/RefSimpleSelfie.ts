@@ -1,3 +1,5 @@
+import { SimpleSelfie } from "./Namespace";
+
 export interface RefSimpleSelfie {
-  captureImage(): Uint8ClampedArray;
+  captureImage(): Promise<SimpleSelfie.CapturedImage>;
 }

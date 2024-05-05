@@ -8,6 +8,7 @@ import React, {
 import { Selfie } from "simple-selfie";
 import { RefSimpleSelfie } from "./RefSimpleSelfie";
 import { SimpleSelfie } from "./Namespace";
+import { CapturedImage } from "simple-selfie/dist/CapturedImage";
 
 export const ReactSimpleSelfie = forwardRef(
   (
@@ -16,11 +17,13 @@ export const ReactSimpleSelfie = forwardRef(
       styles = {},
       children,
       onFaceFrameProcessed = () => {},
+      loadingComponent,
     }: {
       classes?: string[];
       styles?: React.CSSProperties;
       children?: React.ReactNode;
       onFaceFrameProcessed?: (frame: SimpleSelfie.ProcessedFrame) => void;
+      loadingComponent?: React.ReactNode;
     },
     ref: React.Ref<RefSimpleSelfie>
   ) => {
@@ -28,12 +31,14 @@ export const ReactSimpleSelfie = forwardRef(
     const [selfie, setSelfie] = React.useState<SimpleSelfie.Selfie | null>(
       null
     );
+    const [loading, setLoading] = React.useState(true);
+
     useImperativeHandle(
       ref,
       () => ({
-        captureImage(): Uint8ClampedArray {
+        captureImage(): Promise<SimpleSelfie.CapturedImage> {
           if (!selfie) {
-            return new Uint8ClampedArray();
+            return Promise.resolve(new CapturedImage(null, undefined));
           }
 
           return selfie.captureImage();
@@ -49,6 +54,7 @@ export const ReactSimpleSelfie = forwardRef(
       const selfieComponent = new Selfie({
         container: containerRef.current,
         onFaceFrameProcessed: onFaceFrameProcessed,
+        onLoaded: () => setLoading(false),
       });
 
       selfieComponent.start();
@@ -70,6 +76,11 @@ export const ReactSimpleSelfie = forwardRef(
         }}
         ref={containerRef}
       >
+        {
+          loading && loadingComponent ? (
+            <>{loadingComponent}</>
+          ) : null
+        }
         {children && Children.map(children, (child) => <>{child}</>)}
       </div>
     );

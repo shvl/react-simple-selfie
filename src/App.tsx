@@ -4,7 +4,6 @@ import { ReactSimpleSelfie } from "./lib/ReactSimpleSelfie";
 import overlay from "./images/overlay.svg";
 import {
   FACE_DEVIATION,
-  FACE_FRAME,
   FACE_WIDTH,
   SELFIE_FRAME,
 } from "./constants";
@@ -13,11 +12,11 @@ import { SimpleSelfie } from "./lib/Namespace";
 import { RefSimpleSelfie } from "./lib/RefSimpleSelfie";
 import { FacePosition } from "./components/FacePosition";
 import { PictureModal } from "./components/PictureModal";
+import { Loading } from "./components/Loading";
+import { Frame } from "simple-selfie/dist/types";
+import { EyeBlurDetection } from "./interfaces/EyeBlurDetection";
 
 function App() {
-  const [lastFaceFrame, setLastFaceFrame] = useState<SimpleSelfie.Frame | null>(
-    null
-  );
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [lookLeft, setLookLeft] = useState(false);
   const [lookRight, setLookRight] = useState(false);
@@ -25,7 +24,8 @@ function App() {
   const [lookDown, setLookDown] = useState(false);
   const [isPictureModalOpened, setIsPictureModalOpened] = useState(false);
   const [capturedImage, setCapturedImage] = useState("");
-  const [edgeDetectionImage, setEdgeDetectionImage] = useState("");
+  const [blurDetectionLeftEye, setBlurDetectionLeftEye] = useState<EyeBlurDetection>({} as EyeBlurDetection);
+  const [blurDetectionRightEye, setBlurDetectionRightEye] = useState<EyeBlurDetection>({} as EyeBlurDetection);
   const [blurVariance, setBlurVariance] = useState(0);
 
   const parentRef = useRef<RefSimpleSelfie>();
@@ -35,37 +35,65 @@ function App() {
   }, []);
 
   const captureImage = useCallback(async () => {
-    if (!parentRef.current || !lastFaceFrame) {
+    if (!parentRef.current) {
       return;
     }
 
-    const data = parentRef.current.captureImage();
+    const capturedImage = await parentRef.current.captureImage();
+    if (!capturedImage.isFaceDetected()) {
+      return alert("No face detected");
+    }
+
+    const face = capturedImage.getFace();
+    const data = capturedImage.getImageData();
+
+    const getEyeVariance = async (data: Uint8ClampedArray, eyeFrame: Frame, name: string): Promise<EyeBlurDetection> => {
+      const cropped = await Processors.cropFrame(SELFIE_FRAME, eyeFrame, data);
+      const croppedImage = await Processors.toImage(eyeFrame, cropped);
+      const laplacian = await Processors.laplacian(eyeFrame, cropped, 1.2);
+      const laplacianImage = await Processors.toImage(eyeFrame, laplacian);
+
+      const THRERSHOLD = 60;
+
+      const reluMiniProcessed = await Processors.pixelProcessor(eyeFrame, laplacian, (value) => value > THRERSHOLD ? value : 0);
+
+      const suppresedNoizeLaplacian = await Processors.suppressNoise(eyeFrame, reluMiniProcessed, 5, THRERSHOLD);
+      const suppresedNoizeLaplacianImage = await Processors.toImage(eyeFrame, suppresedNoizeLaplacian);
+      const blurVarianceResult = await Processors.variance(suppresedNoizeLaplacian);
+      const normalizedBlurVariance = (blurVarianceResult * eyeFrame.width) / eyeFrame.height;
+
+      return {
+        name,
+        image: croppedImage,
+        laplacian: laplacianImage,
+        noiseSuppressed: suppresedNoizeLaplacianImage,
+        variance: Math.round(normalizedBlurVariance)
+      };
+    };
+
+    const leftEyeFrame = face.getLeftEyeFrame();
+    const rightEyeFrame = face.getRightEyeFrame();
+
+    const leftEyeVariance = await getEyeVariance(data, leftEyeFrame, 'left');
+    const rightEyeVariance = await getEyeVariance(data, rightEyeFrame, 'right');
+
+    setBlurDetectionLeftEye(leftEyeVariance);
+    setBlurDetectionRightEye(rightEyeVariance);
 
     const image = await Processors.toImage(SELFIE_FRAME, data);
-    const cropped = await Processors.cropFrame(
-      SELFIE_FRAME,
-      lastFaceFrame,
-      data
-    );
-    const resized = await Processors.resizeFrame(
-      lastFaceFrame,
-      FACE_FRAME,
-      cropped
-    );
-    const laplacian = await Processors.laplacian(FACE_FRAME, resized);
-    const laplacianImage = await Processors.toImage(FACE_FRAME, laplacian);
-    const blurVarianceResult = await Processors.variance(laplacian);
 
     setCapturedImage(image);
-    setEdgeDetectionImage(laplacianImage);
     setIsPictureModalOpened(true);
-    setBlurVariance(blurVarianceResult);
-  }, [parentRef, lastFaceFrame]);
+    setBlurVariance(leftEyeVariance.variance + rightEyeVariance.variance);
+  }, [parentRef]);
 
   const onFaceFrameProcessed = useCallback(
-    (result: SimpleSelfie.ProcessedFrame) => {
-      const { face, faceFrame } = result;
-      setLastFaceFrame(faceFrame);
+    (processed: SimpleSelfie.ProcessedFrame) => {
+      if (!processed.isFaceDetected()) {
+        return;
+      }
+
+      const face = processed.getFace();
 
       if (face) {
         const faceWidth = face.getWidth();
@@ -107,6 +135,7 @@ function App() {
             justifyContent: "center",
           }}
           classes={["video-container__video"]}
+          loadingComponent={<Loading />}
         >
           <img
             src={overlay}
@@ -122,7 +151,8 @@ function App() {
         isOpened={isPictureModalOpened}
         onClose={closeModal}
         capturedImage={capturedImage}
-        edgeDetectionImage={edgeDetectionImage}
+        blurDetectionLeftEye={blurDetectionLeftEye}
+        blurDetectionRightEye={blurDetectionRightEye}
         blurVariance={blurVariance}
       ></PictureModal>
     </div>

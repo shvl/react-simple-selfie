@@ -1,17 +1,21 @@
 import React, { useCallback, useMemo } from "react";
 import { BLUR_THRESHOLD } from "../constants";
+import { EyeBlurDetection } from "../interfaces/EyeBlurDetection";
+import { EyeGrid } from "./EyeGrid";
 
 export const PictureModal = ({
   isOpened,
   onClose,
   capturedImage,
-  edgeDetectionImage,
+  blurDetectionLeftEye,
+  blurDetectionRightEye,
   blurVariance,
 }: {
   isOpened: boolean;
   onClose: () => void;
   capturedImage: string;
-  edgeDetectionImage: string;
+  blurDetectionLeftEye: EyeBlurDetection;
+  blurDetectionRightEye: EyeBlurDetection;
   blurVariance: number;
 }) => {
   const isBlurred = useMemo(
@@ -58,12 +62,9 @@ export const PictureModal = ({
           </div>
           <div className="result-image">
             <details>
-              <summary>Edge detection</summary>
-              <img
-                src={edgeDetectionImage}
-                className="result-image__laplacian"
-                alt="edge detection"
-              />
+              <summary>Blur detection</summary>
+              <EyeGrid {...blurDetectionLeftEye} />
+              <EyeGrid {...blurDetectionRightEye} />
             </details>
           </div>
         </div>
