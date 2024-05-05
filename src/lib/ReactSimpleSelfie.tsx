@@ -9,6 +9,7 @@ import { Selfie } from "simple-selfie";
 import { RefSimpleSelfie } from "./RefSimpleSelfie";
 import { SimpleSelfie } from "./Namespace";
 import { CapturedImage } from "simple-selfie/dist/CapturedImage";
+import { Face, ProcessedFrame } from "simple-selfie/dist/types";
 
 export const ReactSimpleSelfie = forwardRef(
   (
@@ -16,14 +17,18 @@ export const ReactSimpleSelfie = forwardRef(
       classes = [],
       styles = {},
       children,
-      onFaceFrameProcessed = () => {},
+      onFaceFrameProcessed,
+      onFrameProcessed,
       loadingComponent,
+      faceDetectionInterval,
     }: {
       classes?: string[];
       styles?: React.CSSProperties;
       children?: React.ReactNode;
-      onFaceFrameProcessed?: (frame: SimpleSelfie.ProcessedFrame) => void;
+      onFaceFrameProcessed?: (frame: ProcessedFrame) => void;
+      onFrameProcessed?: (frameData: CanvasRenderingContext2D | null, face: Face | null) => void;
       loadingComponent?: React.ReactNode;
+      faceDetectionInterval?: number;
     },
     ref: React.Ref<RefSimpleSelfie>
   ) => {
@@ -54,7 +59,9 @@ export const ReactSimpleSelfie = forwardRef(
       const selfieComponent = new Selfie({
         container: containerRef.current,
         onFaceFrameProcessed: onFaceFrameProcessed,
+        onFrameProcessed: onFrameProcessed,
         onLoaded: () => setLoading(false),
+        faceDetectionInterval: faceDetectionInterval,
       });
 
       selfieComponent.start();
@@ -63,7 +70,7 @@ export const ReactSimpleSelfie = forwardRef(
       return () => {
         selfieComponent.stop();
       };
-    }, [containerRef, onFaceFrameProcessed]);
+    }, [containerRef, onFaceFrameProcessed, onFrameProcessed, faceDetectionInterval]);
 
     return (
       <div

@@ -7,6 +7,7 @@ export const PictureModal = ({
   isOpened,
   onClose,
   capturedImage,
+  showBlurDetection,
   blurDetectionLeftEye,
   blurDetectionRightEye,
   blurVariance,
@@ -14,6 +15,7 @@ export const PictureModal = ({
   isOpened: boolean;
   onClose: () => void;
   capturedImage: string;
+  showBlurDetection: boolean;
   blurDetectionLeftEye: EyeBlurDetection;
   blurDetectionRightEye: EyeBlurDetection;
   blurVariance: number;
@@ -50,23 +52,31 @@ export const PictureModal = ({
               className="result-image__image"
               alt="selfie"
             />
-            <p className={`result-image__blurred ${ isBlurred ? 'result-image__blurred_blurred' : ''}`}>
-              {isBlurred ? "Blurred" : "Not blurred: "}{" "}
-              {Math.round(blurVariance)}
-            </p>
+            {showBlurDetection && (
+              <p
+                className={`result-image__blurred ${
+                  isBlurred ? "result-image__blurred_blurred" : ""
+                }`}
+              >
+                {isBlurred ? "Blurred" : "Not blurred: "}{" "}
+                {Math.round(blurVariance)}
+              </p>
+            )}
             <div>
               <button className="download" onClick={download}>
                 Download
               </button>
             </div>
           </div>
-          <div className="result-image">
-            <details>
-              <summary>Blur detection</summary>
-              <EyeGrid {...blurDetectionLeftEye} />
-              <EyeGrid {...blurDetectionRightEye} />
-            </details>
-          </div>
+          {showBlurDetection && (
+            <div className="result-image">
+              <details>
+                <summary>Blur detection</summary>
+                <EyeGrid {...blurDetectionLeftEye} />
+                <EyeGrid {...blurDetectionRightEye} />
+              </details>
+            </div>
+          )}
         </div>
       </article>
     </dialog>

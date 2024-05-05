@@ -78,6 +78,7 @@
 
 .result-image {
   position: relative;
+  margin-bottom: 1em;
 }
 .result-image__blurred {
   position: absolute;
