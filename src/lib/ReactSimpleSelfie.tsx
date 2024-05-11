@@ -21,6 +21,7 @@ export const ReactSimpleSelfie = forwardRef(
       onFrameProcessed,
       loadingComponent,
       faceDetectionInterval,
+      onSelfie,
     }: {
       classes?: string[];
       styles?: React.CSSProperties;
@@ -29,6 +30,7 @@ export const ReactSimpleSelfie = forwardRef(
       onFrameProcessed?: (frameData: CanvasRenderingContext2D | null, face: Face | null) => void;
       loadingComponent?: React.ReactNode;
       faceDetectionInterval?: number;
+      onSelfie?: (selfie: SimpleSelfie.Selfie) => void;
     },
     ref: React.Ref<RefSimpleSelfie>
   ) => {
@@ -64,13 +66,17 @@ export const ReactSimpleSelfie = forwardRef(
         faceDetectionInterval: faceDetectionInterval,
       });
 
+      if (onSelfie){
+        onSelfie(selfieComponent);
+      }
+
       selfieComponent.start();
       selfieComponent.startFaceDetection();
       setSelfie(selfieComponent);
       return () => {
         selfieComponent.stop();
       };
-    }, [containerRef, onFaceFrameProcessed, onFrameProcessed, faceDetectionInterval]);
+    }, [containerRef, onFaceFrameProcessed, onFrameProcessed, faceDetectionInterval, onSelfie]);
 
     return (
       <div
