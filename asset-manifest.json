@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/react-simple-selfie/static/css/main.5a325d47.css",
-    "main.js": "/react-simple-selfie/static/js/main.fca1fd40.js",
+    "main.css": "/react-simple-selfie/static/css/main.efe2ffb9.css",
+    "main.js": "/react-simple-selfie/static/js/main.79c08233.js",
     "static/js/453.78dfb132.chunk.js": "/react-simple-selfie/static/js/453.78dfb132.chunk.js",
     "static/media/dog.glb": "/react-simple-selfie/static/media/dog.ed55cc45adcf7771a030.glb",
     "static/media/overlay.svg": "/react-simple-selfie/static/media/overlay.2a1712e79bca3428045253ea9f988813.svg",
     "index.html": "/react-simple-selfie/index.html",
     "static/media/glasses.svg": "/react-simple-selfie/static/media/glasses.01c073bab71fcbefe10183773a86bdaa.svg",
     "static/media/face-position.svg": "/react-simple-selfie/static/media/face-position.dd3ab246351dc18a55a66a07ceb973e7.svg",
-    "main.5a325d47.css.map": "/react-simple-selfie/static/css/main.5a325d47.css.map",
-    "main.fca1fd40.js.map": "/react-simple-selfie/static/js/main.fca1fd40.js.map",
+    "main.efe2ffb9.css.map": "/react-simple-selfie/static/css/main.efe2ffb9.css.map",
+    "main.79c08233.js.map": "/react-simple-selfie/static/js/main.79c08233.js.map",
     "453.78dfb132.chunk.js.map": "/react-simple-selfie/static/js/453.78dfb132.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5a325d47.css",
-    "static/js/main.fca1fd40.js"
+    "static/css/main.efe2ffb9.css",
+    "static/js/main.79c08233.js"
   ]
 }
