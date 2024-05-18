@@ -14,7 +14,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import dogModel from "../images/dog.glb";
 import * as dogMouth from "../constants/dogMouth";
 
-function SelfieAR() {
+function SelfieAvatar() {
   const [lookLeft, setLookLeft] = useState(false);
   const [lookRight, setLookRight] = useState(false);
   const [lookUp, setLookUp] = useState(false);
@@ -32,21 +32,27 @@ function SelfieAR() {
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color().setHSL(0.6, 0, 1);
-    scene.fog = new THREE.Fog(scene.background, 1, 5000);
+    scene.fog = new THREE.Fog(scene.background, 0, 5);
     const camera = new THREE.PerspectiveCamera(
       75,
       SELFIE_FRAME.width / SELFIE_FRAME.height,
       0.1,
       1000
     );
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas });
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true,
+      preserveDrawingBuffer: true,
+    });
     renderer.setSize(SELFIE_FRAME.width, SELFIE_FRAME.height);
 
+    const light = new THREE.AmbientLight(0x909090);
     const dirLight = new THREE.DirectionalLight(0xffffff, 3);
     dirLight.color.setHSL(0.1, 1, 0.95);
     dirLight.position.set(-1, 1.75, 1);
     dirLight.position.multiplyScalar(30);
 
+    scene.add(light);
     scene.add(dirLight);
     let dog: any;
 
@@ -64,46 +70,77 @@ function SelfieAR() {
       }
     );
 
-    camera.position.z = 0.5;
-    selfie.setOnFrameProcessedCallback((_ctx: CanvasRenderingContext2D | null, face: Face | null) => {
-      if (!face || !dog) {
-        return;
-      }
-      const rotation = face.direction.getRotation();
-      const mouthHeight = Math.min(face.getMouthHeight(), 40);
-      const openedMouthFactor = mouthHeight / 40;
-      const nose = face.getNose();
-      
-      dog.rotation.x = (-rotation.x * Math.PI) / 180;
-      dog.rotation.y = (rotation.y * Math.PI) / 180;
-      dog.rotation.z = (rotation.z * Math.PI) / 180;
+    camera.position.z = 0.4;
+    let oldRotation = { x: 0, y: 0, z: 0 };
+    let olsScale = 1;
+    const ROTATION_THRESHOLD = 2;
+    const SCALE_THRESHOLD = 0.02;
 
-      dog.position.x = -(SELFIE_FRAME.width / 2 - nose.x) / 2000;
-      dog.position.y = (SELFIE_FRAME.height / 2 - nose.y) / 2000;
-      const scale = face.getWidth() / 120;
-      dog.scale.set(scale, scale, scale);
-
-      const vertex = new THREE.Vector3();
-      for (let j = 0; j < dog.children[0].children.length; j++) {
-        const positionAttribute = dog.children[0].children[j].geometry.attributes.position;
-        for ( let i = 0; i < positionAttribute.count; i ++ ) {
-          const c = dogMouth.closed[j][i];
-          const o = dogMouth.opened[j][i];
-
-          vertex.fromBufferAttribute( positionAttribute, i );
-
-          vertex.x = c.x + (o.x - c.x) * (openedMouthFactor);
-          vertex.y = c.y + (o.y - c.y) * (openedMouthFactor);
-          vertex.z = c.z + (o.z - c.z) * (openedMouthFactor);
-
-          positionAttribute.setXYZ( i, vertex.x, vertex.y, vertex.z );
-        }
-        positionAttribute.needsUpdate = true;
-      }
-      
-
-      renderer.render(scene, camera);
+    selfie.setOnResize(() => {
+      const height = Math.min(
+        selfie.getContainer().getBoundingClientRect().width,
+        selfie.getContainer().getBoundingClientRect().height
+      );
+      const width = Math.floor(height * (SELFIE_FRAME.width / SELFIE_FRAME.height));
+      canvas.width = width;
+      canvas.height = height;
+      renderer.setSize(width, height);
+      camera.aspect = SELFIE_FRAME.width / SELFIE_FRAME.height;
+      camera.updateProjectionMatrix();
     });
+
+    selfie.setOnFrameProcessedCallback(
+      (_ctx: CanvasRenderingContext2D | null, face: Face | null) => {
+        if (!face || !dog) {
+          return;
+        }
+        const rotation = face.direction.getRotation();
+        const mouthHeight = Math.min(face.getMouthHeight(), 40);
+        const openedMouthFactor = mouthHeight / 40;
+        const nose = face.getNose();
+
+        if (
+          Math.abs(rotation.x - oldRotation.x) +
+            Math.abs(rotation.y - oldRotation.y) +
+            Math.abs(rotation.z - oldRotation.z) >
+          ROTATION_THRESHOLD
+        ) {
+          dog.rotation.x = (-rotation.x * Math.PI) / 180;
+          dog.rotation.y = (rotation.y * Math.PI) / 180;
+          dog.rotation.z = (rotation.z * Math.PI) / 180;
+          oldRotation = rotation;
+        }
+
+        dog.position.x = -(SELFIE_FRAME.width / 2 - nose.x) / 2000;
+        dog.position.y = (SELFIE_FRAME.height / 2 - nose.y) / 2000;
+        const scale = (face.getWidth() / 120);
+        if (Math.abs(scale - olsScale) > SCALE_THRESHOLD) {
+          dog.scale.set(scale, scale, scale);
+          olsScale = scale;
+        }
+
+        const vertex = new THREE.Vector3();
+        for (let j = 0; j < dog.children[0].children.length; j++) {
+          const positionAttribute =
+            dog.children[0].children[j].geometry.attributes.position;
+          for (let i = 0; i < positionAttribute.count; i++) {
+            const c = dogMouth.closed[j][i];
+            const o = dogMouth.opened[j][i];
+
+            vertex.fromBufferAttribute(positionAttribute, i);
+
+            vertex.x = c.x + (o.x - c.x) * openedMouthFactor;
+            vertex.y = c.y + (o.y - c.y) * openedMouthFactor;
+            vertex.z = c.z + (o.z - c.z) * openedMouthFactor;
+
+            positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+          }
+          positionAttribute.needsUpdate = true;
+        }
+
+        renderer.render(scene, camera);
+      }
+    );
   }, []);
 
   const closeModal = useCallback(() => {
@@ -135,8 +172,8 @@ function SelfieAR() {
 
       const face = processed.getFace();
 
-      setLookLeft(face.direction.isLookRight()); //mirroring camera
-      setLookRight(face.direction.isLookLeft()); //mirroring camera
+      setLookLeft(face.direction.isLookLeft());
+      setLookRight(face.direction.isLookRight());
       setLookUp(face.direction.isLookUp());
       setLookDown(face.direction.isLookDown());
     },
@@ -185,4 +222,4 @@ function SelfieAR() {
   );
 }
 
-export default SelfieAR;
+export default SelfieAvatar;

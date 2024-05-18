@@ -64,8 +64,8 @@ function SelfieAR() {
 
       const face = processed.getFace();
 
-      setLookLeft(face.direction.isLookRight()); //mirroring camera
-      setLookRight(face.direction.isLookLeft()); //mirroring camera
+      setLookLeft(face.direction.isLookLeft());
+      setLookRight(face.direction.isLookRight());
       setLookUp(face.direction.isLookUp());
       setLookDown(face.direction.isLookDown());
     },

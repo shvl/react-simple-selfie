@@ -1,61 +1,51 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./styles/app.css";
 import SelfieBlurDetection from "./components/SelfieBlurDetection";
 import SelfieAR from "./components/SelfieAR";
 import SelfieAvatar from "./components/SelfieAvatar";
+import { useRouter } from "./hooks/useRouter";
 
-const getComponent = (value: string) => {
-  switch (value) {
-    case "selfie":
-      return <SelfieBlurDetection />;
-    case "ar":
-      return <SelfieAR />;
-    case "avatar":
-      return <SelfieAvatar />;
-    default:
-      return null;
-  }
-};
+const pages = [
+  { name: "selfie", title: "Selfie", component: <SelfieBlurDetection />},
+  { name: "ar", title: "AR", component: <SelfieAR />},
+  { name: "avatar", title: "Avatar", component: <SelfieAvatar />},
+];
 
 function App() {
-  const [value, setValue] = React.useState("selfie");
+  const { query, navigate } = useRouter();
+
   const onDemoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
+    navigate(e.target.value);
   };
 
-  const component = getComponent(value);
+  useEffect(() => {
+    const appName = query.get("app");
+    const exists = pages.find((page) => page.name === appName);
+    if (!appName && !exists) {
+      navigate(pages[0].name);
+    }
+  }, [query, navigate]);
+
+  const appName = query.get("app");
+  const component = pages.find((page) => page.name === appName)?.component;
 
   return (
     <section className="container">
       <fieldset>
         <legend>Demo:</legend>
-        <input
-          type="radio"
-          id="demo-selfie"
-          value="selfie"
-          name="demo"
-          checked={value === "selfie"}
-          onChange={onDemoChange}
-        />
-        <label htmlFor="demo-selfie">Selfie</label>
-        <input
-          type="radio"
-          id="demo-ar"
-          value="ar"
-          name="demo"
-          checked={value === "ar"}
-          onChange={onDemoChange}
-        />
-        <label htmlFor="demo-ar">AR</label>
-        <input
-          type="radio"
-          id="demo-avatar"
-          value="avatar"
-          name="demo"
-          checked={value === "avatar"}
-          onChange={onDemoChange}
-        />
-        <label htmlFor="demo-avatar">Avatar</label>
+        {pages.map((page, i) => (
+          <div key={i}>
+            <input
+              type="radio"
+              id={`demo-${page.name}`}
+              value={page.name}
+              name="demo"
+              checked={appName === page.name}
+              onChange={onDemoChange}
+            />
+            <label htmlFor={`demo-${page.name}`}>{page.title}</label>
+          </div>
+        ))}
       </fieldset>
 
       {component}
