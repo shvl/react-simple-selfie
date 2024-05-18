@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/react-simple-selfie/static/css/main.2361616b.css",
-    "main.js": "/react-simple-selfie/static/js/main.e3aab113.js",
+    "main.js": "/react-simple-selfie/static/js/main.aaa6cb90.js",
     "static/js/453.78dfb132.chunk.js": "/react-simple-selfie/static/js/453.78dfb132.chunk.js",
     "static/media/dog.glb": "/react-simple-selfie/static/media/dog.ed55cc45adcf7771a030.glb",
     "static/media/overlay.svg": "/react-simple-selfie/static/media/overlay.2a1712e79bca3428045253ea9f988813.svg",
@@ -9,11 +9,11 @@
     "static/media/glasses.svg": "/react-simple-selfie/static/media/glasses.01c073bab71fcbefe10183773a86bdaa.svg",
     "static/media/face-position.svg": "/react-simple-selfie/static/media/face-position.dd3ab246351dc18a55a66a07ceb973e7.svg",
     "main.2361616b.css.map": "/react-simple-selfie/static/css/main.2361616b.css.map",
-    "main.e3aab113.js.map": "/react-simple-selfie/static/js/main.e3aab113.js.map",
+    "main.aaa6cb90.js.map": "/react-simple-selfie/static/js/main.aaa6cb90.js.map",
     "453.78dfb132.chunk.js.map": "/react-simple-selfie/static/js/453.78dfb132.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.2361616b.css",
-    "static/js/main.e3aab113.js"
+    "static/js/main.aaa6cb90.js"
   ]
 }
