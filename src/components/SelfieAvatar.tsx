@@ -158,7 +158,8 @@ function SelfieAvatar() {
     }
 
     const data = capturedImage.getImageData();
-    const image = await Processors.toImage(SELFIE_FRAME, data);
+    const mirrored = await Processors.mirror(SELFIE_FRAME, data);
+    const image = await Processors.toImage(SELFIE_FRAME, mirrored);
 
     setCapturedImage(image);
     setIsPictureModalOpened(true);
