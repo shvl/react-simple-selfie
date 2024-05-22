@@ -1,5 +1,7 @@
 # react-simple-selfie
 
+React wrapper for https://github.com/shvl/simple-selfie
+
 Demo: [https://shvl.github.io/react-simple-selfie](https://shvl.github.io/react-simple-selfie)
 
 ## Installation
